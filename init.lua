@@ -8,25 +8,9 @@
 minetest.register_abm({
 		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
 		interval = 8,
-		chance = 1,	
-		
-		action = function(pos, node, active_object_count, active_object_count_wider)
-		if node.name == "fireworks:red" then
-				  minetest.remove_node(pos,{name="fireworks:red"})
-		elseif node.name == "fireworks:blue" then
-		          minetest.remove_node(pos,{name="fireworks:blue"})
-		elseif node.name == "fireworks:green" then
-				  minetest.remove_node(pos,{name="fireworks:green"})
-		elseif node.name == "fireworks:purple" then
-		          minetest.remove_node(pos,{name="fireworks:purple"})
-		elseif node.name == "fireworks:orange" then
-				  minetest.remove_node(pos,{name="fireworks:orange"})
-		elseif node.name == "fireworks:yellow" then
-		          minetest.remove_node(pos,{name="fireworks:yellow"})
-		elseif node.name == "fireworks:rainbow" then
-		          minetest.remove_node(pos,{name="fireworks:rainbow"})
-				  
-			end
+		chance = 1,
+		action = function(pos)
+			minetest.remove_node(pos)
 		end
 })
 
@@ -232,112 +216,30 @@ local play_sound = function(list, number)
 		local handler = minetest.sound_play(list[number].name, {gain=gain})
 end]]
 
+local function show_fireworks(pos, name, r, rand)
+	local tmp = r*r
+	for x=-r,r do
+		for y=-r,r do
+			for z=-r,r do
+				if x*x+y*y+z*z <= tmp then
+					minetest.add_node({x=pos.x+x+rand.x,y=pos.y+y+rand.y,z=pos.z+z+rand.z},{name=name}) 
+				end
+			end
+		end
+	end
+end
 
-function fireworks_activate (pos, node)
---play_sound(fireworks, 1)
+local sorts = {"red", "blue", "green", "purple", "orange", "yellow", "rainbow"}
 
-zrand = math.random(-10, 10)
-xrand = math.random(-10,10)
-yrand = math.random(10, 30)
-if 
-  node.name == "fireworks:firework_red" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:red'}) 
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_red"})
-elseif
-  node.name == "fireworks:firework_blue" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:blue'}) 
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_blue"})
-elseif
-  node.name == "fireworks:firework_green" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:green'})
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_green"})
-elseif
-  node.name == "fireworks:firework_purple" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:purple'})
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_purple"})
-elseif
-  node.name == "fireworks:firework_orange" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:orange'})
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_orange"})
-elseif
-  node.name == "fireworks:firework_yellow" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:yellow'})
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_yellow"})
-elseif
-  node.name == "fireworks:firework_rainbow" 
-then
-local radius = 4 
-for x=-radius,radius do
-for y=-radius,radius do
-for z=-radius,radius do
-   if x*x+y*y+z*z <= radius*radius then
-      minetest.add_node({x=pos.x+x+xrand,y=pos.y+y+yrand,z=pos.z+z+zrand},{name='fireworks:rainbow'})
-end
-end
-end
-end
-minetest.remove_node(pos,{name="fireworks:firework_rainbow"})
-end
+function fireworks_activate(pos, node)
+	--play_sound(fireworks, 1)
+	for _,i in ipairs(sorts) do
+		if node.name == "fireworks:firework_"..i then
+			show_fireworks(pos, 'fireworks:'..i, 4, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
+			break
+		end
+	end
+	minetest.remove_node(pos)
 end
 minetest.register_on_punchnode(fireworks_activate)
 
