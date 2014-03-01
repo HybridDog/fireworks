@@ -17,7 +17,7 @@ local sorts = {
 
 minetest.register_abm({
 		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
-		interval = 80,
+		interval = 30,
 		chance = 1,
 		action = function(pos)
 			minetest.remove_node(pos)
