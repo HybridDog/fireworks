@@ -17,7 +17,7 @@ local sorts = {
 
 minetest.register_abm({
 		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
-		interval = 8,
+		interval = 80,
 		chance = 1,
 		action = function(pos)
 			minetest.remove_node(pos)
@@ -30,6 +30,9 @@ for _,i in ipairs(sorts) do
 		description = i[2].." Fireworks",
 		tiles = {"fireworks_firework_"..i[1]..".png"},
 		groups = {cracky=3},
+		on_punch = function(pos)
+			fireworks_activate(pos, i[1])
+		end,
 		sounds = default.node_sound_stone_defaults(),
 	})
 
@@ -40,8 +43,8 @@ for _,i in ipairs(sorts) do
 		light_source = 14,
 		walkable = false,
 		pointable = false,
-		groups = {cracky=3,not_in_creative_inventory=1},
-		sounds = default.node_sound_stone_defaults(),
+		waving = 1,
+		groups = {not_in_creative_inventory=1},
 	})
 end
 
@@ -106,29 +109,62 @@ local play_sound = function(list, number)
 		local handler = minetest.sound_play(list[number].name, {gain=gain})
 end]]
 
-local function show_fireworks(pos, name, r, rand)
+local function make_ps(r)
+	local tab = {}
+	local num = 1
 	local tmp = r*r
 	for x=-r,r do
 		for y=-r,r do
 			for z=-r,r do
 				if x*x+y*y+z*z <= tmp then
-					minetest.add_node({x=pos.x+x+rand.x,y=pos.y+y+rand.y,z=pos.z+z+rand.z},{name=name}) 
+					tab[num] = {x=x,y=y,z=z}
+					num = num+1
 				end
 			end
 		end
 	end
+	return tab
 end
 
-function fireworks_activate(pos, node)
-	--play_sound(fireworks, 1)
-	for _,i in ipairs(sorts) do
-		if node.name == "fireworks:firework_"..i[1] then
-			show_fireworks(pos, 'fireworks:'..i[1], 4, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
-			break
+local fireworks_ps
+
+local c_air = minetest.get_content_id("air")
+
+local function show_fireworks(p, name)
+	fireworks_ps = fireworks_ps or make_ps(4)
+
+	local manip = minetest.get_voxel_manip()
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(
+		vector.subtract(p, 4),
+		vector.add(p, 4)
+	)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
+	local nodes = manip:get_data()
+
+	local id = minetest.get_content_id("fireworks:"..name)
+	for _,i in ipairs(fireworks_ps) do
+		local posi = vector.add(p, i)
+		local p_posi = area:index(posi.x, posi.y, posi.z)
+		if nodes[p_posi] == c_air then
+			nodes[p_posi] = id
+			minetest.after(math.random()*7+1, function(posi)
+				minetest.remove_node(posi)
+				minetest.sound_play("default_grass_footstep", {gain=1, pos = posi, max_hear_distance = 50})
+			end, posi)
 		end
 	end
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+end
+
+function fireworks_activate(pos, name)
+	minetest.sound_play("default_sand_footstep", {gain=1, pos = posi, max_hear_distance = 50})
+	show_fireworks(
+		vector.add(pos, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)}),
+		name
+	)
 	minetest.remove_node(pos)
 end
-minetest.register_on_punchnode(fireworks_activate)
 
-print("Fireworks Mod Loaded!")
+print("[fireworks] Fireworks Mod Loaded!")
