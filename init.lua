@@ -5,6 +5,8 @@
 
 --Sound will be added soon
 
+local sorts = {"red", "blue", "green", "purple", "orange", "yellow", "rainbow"}
+
 minetest.register_abm({
 		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
 		interval = 8,
@@ -15,145 +17,25 @@ minetest.register_abm({
 })
 
 
-minetest.register_node("fireworks:firework_red", {
-	description = "Red Fireworks",
-	tiles = {"fireworks_firework_red.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
+for _,i in ipairs(sorts) do
+	minetest.register_node("fireworks:firework_"..i[1], {
+		description = i[2].." Fireworks",
+		tiles = {"fireworks_firework_"..i[1]..".png"},
+		groups = {cracky=3},
+		sounds = default.node_sound_stone_defaults(),
+	})
 
-minetest.register_node("fireworks:red", {
-	drawtype = "plantlike",
-	description = "Red",
-	tiles = {"fireworks_red.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {cracky=3,not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:firework_blue", {
-	description = "Blue Fireworks",
-	tiles = {"fireworks_firework_blue.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:blue", {
-	drawtype = "plantlike",
-	description = "Blue",
-	tiles = {"fireworks_blue.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {cracky=3,not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:firework_green", {
-	description = "Green Fireworks",
-	tiles = {"fireworks_firework_green.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:green", {
-	drawtype = "plantlike",
-	description = "Green",
-	tiles = {"fireworks_green.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {cracky=3,not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:firework_purple", {
-	description = "Purple Fireworks",
-	tiles = {"fireworks_firework_purple.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:purple", {
-	drawtype = "plantlike",
-	description = "Purple",
-	tiles = {"fireworks_purple.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:firework_orange", {
-	description = "Orange Fireworks",
-	tiles = {"fireworks_firework_orange.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:orange", {
-	drawtype = "plantlike",
-	description = "Orange",
-	tiles = {"fireworks_orange.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {cracky=3,not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:firework_yellow", {
-	description = "Yellow Fireworks",
-	tiles = {"fireworks_firework_yellow.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:yellow", {
-	drawtype = "plantlike",
-	description = "Yellow",
-	tiles = {"fireworks_yellow.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {cracky=3,not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:firework_rainbow", {
-	description = "Rainbow Fireworks",
-	tiles = {"fireworks_firework_rainbow.png"},
-	is_ground_content = true,
-	groups = {cracky=3},
-	sounds = default.node_sound_stone_defaults(),
-})
-
-minetest.register_node("fireworks:rainbow", {
-	drawtype = "plantlike",
-	description = "Rainbow",
-	tiles = {"fireworks_rainbow.png"},
-	light_source = 14,
-	walkable = false,
-	is_ground_content = true,
-	pointable = false,
-	groups = {not_in_creative_inventory=1},
-	sounds = default.node_sound_stone_defaults(),
-})
+	minetest.register_node("fireworks:"..i[1], {
+		drawtype = "plantlike",
+		description = i[2],
+		tiles = {"fireworks_"..i[1]..".png"},
+		light_source = 14,
+		walkable = false,
+		pointable = false,
+		groups = {cracky=3,not_in_creative_inventory=1},
+		sounds = default.node_sound_stone_defaults(),
+	})
+end
 
 minetest.register_craft({
 	output = "fireworks:firework_red 2",
@@ -229,13 +111,11 @@ local function show_fireworks(pos, name, r, rand)
 	end
 end
 
-local sorts = {"red", "blue", "green", "purple", "orange", "yellow", "rainbow"}
-
 function fireworks_activate(pos, node)
 	--play_sound(fireworks, 1)
 	for _,i in ipairs(sorts) do
-		if node.name == "fireworks:firework_"..i then
-			show_fireworks(pos, 'fireworks:'..i, 4, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
+		if node.name == "fireworks:firework_"..i[1] then
+			show_fireworks(pos, 'fireworks:'..i[1], 4, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
 			break
 		end
 	end
