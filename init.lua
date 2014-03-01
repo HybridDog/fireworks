@@ -5,7 +5,15 @@
 
 --Sound will be added soon
 
-local sorts = {"red", "blue", "green", "purple", "orange", "yellow", "rainbow"}
+local sorts = {
+	{"red", "Red"},
+	{"blue", "Blue"},
+	{"green", "Green"},
+	{"purple", "Purple"},
+	{"orange", "Orange"},
+	{"yellow", "Yellow"},
+	{"rainbow", "Rainbow"}
+}
 
 minetest.register_abm({
 		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
