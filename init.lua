@@ -1,10 +1,4 @@
---
---Fireworks by InfinityProject
---License code and textures WTFPL 
---Thanks to Mauvebic, Cornernote, and Neuromancer
-
---Sound will be added soon
-
+local burndelay = 8
 local sorts = {
 	{"red", "Red"},
 	{"blue", "Blue"},
@@ -17,10 +11,14 @@ local sorts = {
 
 minetest.register_abm({
 		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
-		interval = 30,
+		interval = 5,
 		chance = 1,
-		action = function(pos)
-			minetest.remove_node(pos)
+		action = function(pos, node)
+			minetest.after(burndelay, function(param)
+				if minetest.get_node(param[1]).name == param[2] then
+					minetest.remove_node(param[1])
+				end
+			end, {pos, node.name})
 		end
 })
 
@@ -29,10 +27,17 @@ for _,i in ipairs(sorts) do
 	minetest.register_node("fireworks:firework_"..i[1], {
 		description = i[2].." Fireworks",
 		tiles = {"fireworks_firework_"..i[1]..".png"},
-		groups = {cracky=3},
+		groups = {cracky=3, mesecon=2},
 		on_punch = function(pos)
 			fireworks_activate(pos, i[1])
 		end,
+		mesecons = {
+			effector = {
+				action_on = function(pos)
+					fireworks_activate(pos, i[1])
+				end
+			},
+		},
 		sounds = default.node_sound_stone_defaults(),
 	})
 
@@ -147,7 +152,7 @@ local function show_fireworks(p, name)
 		local p_posi = area:index(posi.x, posi.y, posi.z)
 		if nodes[p_posi] == c_air then
 			nodes[p_posi] = id
-			minetest.after(math.random()*7+1, function(posi)
+			minetest.after(math.random()*burndelay, function(posi)
 				minetest.remove_node(posi)
 				minetest.sound_play("default_grass_footstep", {gain=1, pos = posi, max_hear_distance = 50})
 			end, posi)
@@ -159,11 +164,10 @@ local function show_fireworks(p, name)
 end
 
 function fireworks_activate(pos, name)
-	minetest.sound_play("default_sand_footstep", {gain=1, pos = posi, max_hear_distance = 50})
-	show_fireworks(
-		vector.add(pos, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)}),
-		name
-	)
+	minetest.sound_play("default_sand_footstep", {gain=1, pos = pos, max_hear_distance = 50})
+	local pos2 = vector.add(pos, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
+	minetest.sound_play("fireworks", {gain=1, pos = pos2, max_hear_distance = 50})
+	show_fireworks(pos2, name)
 	minetest.remove_node(pos)
 end
 
