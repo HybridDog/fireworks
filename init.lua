@@ -86,22 +86,22 @@ minetest.register_craft({
 	type = "shapeless",
 	output = "fireworks:firework_purple 2",
 	recipe = {"fireworks:firework_red", "fireworks:firework_blue"},
-	
+
 })
 
 minetest.register_craft({
 	type = "shapeless",
 	output = "fireworks:firework_orange 2",
 	recipe = {"fireworks:firework_red", "fireworks:firework_yellow"},
-	
+
 })
 
 minetest.register_craft({
 	type = "shapeless",
 	output = "fireworks:firework_rainbow 5",
-	recipe = 
+	recipe =
 		{"fireworks:firework_red", "fireworks:firework_blue", "fireworks:firework_yellow", "fireworks:firework_orange", "fireworks:firework_green", "fireworks:firework_purple"}
-	
+
 })
 
 --[[
@@ -171,4 +171,4 @@ function fireworks_activate(pos, name)
 	minetest.remove_node(pos)
 end
 
-print("[fireworks] Fireworks Mod Loaded!")
+minetest.log("info", "[fireworks] Fireworks Mod Loaded!")
