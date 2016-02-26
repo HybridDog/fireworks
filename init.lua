@@ -48,13 +48,15 @@ for _,i in pairs(sorts) do
 		description = i[2],
 		tiles = {"fireworks_"..i[1]..".png"},
 		light_source = 14,
-		-- enabled sunlight_propagates reduces lag (no shadow calculation)
+		-- enabled sunlight_propagates reduces lag
 		sunlight_propagates = true,
 		walkable = false,
 		pointable = false,
 		diggable = false,
 		drop = "",
 		waving = 1,
+		visual_scale = 2^0.25,
+		paramtype2 = "degrotate",
 		groups = {not_in_creative_inventory=1, fireworks_flame=1},
 	})
 end
@@ -151,6 +153,7 @@ local function show_fireworks(p, name)
 	)
 	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 	local nodes = manip:get_data()
+	local param2s = manip:get_param2_data()
 
 	local id = minetest.get_content_id("fireworks:"..name)
 	for _,i in pairs(fireworks_ps) do
@@ -158,20 +161,23 @@ local function show_fireworks(p, name)
 		local p_posi = area:indexp(posi)
 		if nodes[p_posi] == c_air then
 			nodes[p_posi] = id
+			param2s[p_posi] = math.random(0,179)
 			minetest.after(math.random()*burndelay, function(posi)
 				minetest.remove_node(posi)
 				minetest.sound_play("default_grass_footstep", {pos = posi, max_hear_distance = 50})
 			end, posi)
 		end
 	end
+
 	manip:set_data(nodes)
+	manip:set_param2_data(param2s)
 	manip:write_to_map()
 	manip:update_map()
 end
 
 function fireworks_activate(pos, name)
 	minetest.sound_play("default_sand_footstep", {pos = pos, max_hear_distance = 50})
-	minetest.after(0.1, function(pos, name)
+	minetest.after(0.2, function(pos, name)
 		local pos2 = vector.add(pos, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
 		minetest.sound_play("fireworks", {gain = 10, pos = pos2, max_hear_distance = 50})
 		show_fireworks(pos2, name)
