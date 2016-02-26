@@ -9,21 +9,23 @@ local sorts = {
 	{"rainbow", "Rainbow"}
 }
 
+-- this abm needs to be a lbm, see https://github.com/minetest/minetest/pull/3677
 minetest.register_abm({
-		nodenames = {"fireworks:red", "fireworks:blue", "fireworks:green", "fireworks:purple", "fireworks:orange", "fireworks:yellow", "fireworks:rainbow"},
-		interval = 5,
-		chance = 1,
-		action = function(pos, node)
-			minetest.after(burndelay, function(param)
-				if minetest.get_node(param[1]).name == param[2] then
-					minetest.remove_node(param[1])
-				end
-			end, {pos, node.name})
-		end
+	nodenames = {"group:fireworks_flame"},
+	interval = 5,
+	chance = 1,
+	catch_up = false,
+	action = function(pos, node)
+		minetest.after(burndelay, function(pos, name)
+			if minetest.get_node(pos).name == name then
+				minetest.remove_node(pos)
+			end
+		end, pos, node.name)
+	end
 })
 
 
-for _,i in ipairs(sorts) do
+for _,i in pairs(sorts) do
 	minetest.register_node("fireworks:firework_"..i[1], {
 		description = i[2].." Fireworks",
 		tiles = {"fireworks_firework_"..i[1]..".png"},
@@ -46,10 +48,14 @@ for _,i in ipairs(sorts) do
 		description = i[2],
 		tiles = {"fireworks_"..i[1]..".png"},
 		light_source = 14,
+		-- enabled sunlight_propagates reduces lag (no shadow calculation)
+		sunlight_propagates = true,
 		walkable = false,
 		pointable = false,
+		diggable = false,
+		drop = "",
 		waving = 1,
-		groups = {not_in_creative_inventory=1},
+		groups = {not_in_creative_inventory=1, fireworks_flame=1},
 	})
 end
 
@@ -147,14 +153,14 @@ local function show_fireworks(p, name)
 	local nodes = manip:get_data()
 
 	local id = minetest.get_content_id("fireworks:"..name)
-	for _,i in ipairs(fireworks_ps) do
+	for _,i in pairs(fireworks_ps) do
 		local posi = vector.add(p, i)
-		local p_posi = area:index(posi.x, posi.y, posi.z)
+		local p_posi = area:indexp(posi)
 		if nodes[p_posi] == c_air then
 			nodes[p_posi] = id
 			minetest.after(math.random()*burndelay, function(posi)
 				minetest.remove_node(posi)
-				minetest.sound_play("default_grass_footstep", {gain=1, pos = posi, max_hear_distance = 50})
+				minetest.sound_play("default_grass_footstep", {pos = posi, max_hear_distance = 50})
 			end, posi)
 		end
 	end
@@ -164,10 +170,12 @@ local function show_fireworks(p, name)
 end
 
 function fireworks_activate(pos, name)
-	minetest.sound_play("default_sand_footstep", {gain=1, pos = pos, max_hear_distance = 50})
-	local pos2 = vector.add(pos, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
-	minetest.sound_play("fireworks", {gain=1, pos = pos2, max_hear_distance = 50})
-	show_fireworks(pos2, name)
+	minetest.sound_play("default_sand_footstep", {pos = pos, max_hear_distance = 50})
+	minetest.after(0.1, function(pos, name)
+		local pos2 = vector.add(pos, {x=math.random(-10, 10), y=math.random(10, 30), z=math.random(-10, 10)})
+		minetest.sound_play("fireworks", {gain = 10, pos = pos2, max_hear_distance = 50})
+		show_fireworks(pos2, name)
+	end, pos, name)
 	minetest.remove_node(pos)
 end
 
